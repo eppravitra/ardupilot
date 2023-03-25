@@ -121,7 +121,7 @@ const AP_Param::GroupInfo AP_AdvancedFailsafe::var_info[] = {
 
     // @Param: MAX_COM_LOSS
     // @DisplayName: Maximum number of comms loss events
-    // @Description: Maximum number of comms loss events before the aircraft stops returning to mission on comms recovery. Use zero to allow for any number of comms loss events.
+    // @Description: Maximum number of comms loss events before the aircraft stops returning to mission on comms recovery. Use zero to allow for any number of comms loss events. Use negative value to continue the mission even after data link is recovered.
     // @User: Advanced
     AP_GROUPINFO("MAX_COM_LOSS", 14, AP_AdvancedFailsafe, _max_comms_loss, 0),
 
@@ -279,7 +279,7 @@ AP_AdvancedFailsafe::check(uint32_t last_valid_rc_ms)
             gcs().send_text(MAV_SEVERITY_DEBUG, "AFS State: AFS_AUTO, GCS now OK");
             // we only return to the mission if we have not exceeded AFS_MAX_COM_LOSS
             if (_saved_wp != 0 && 
-                (_max_comms_loss <= 0 || 
+                (_max_comms_loss == 0 || 
                  _comms_loss_count <= _max_comms_loss)) {
                 mission.set_current_cmd(_saved_wp);            
                 _saved_wp = 0;
