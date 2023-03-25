@@ -240,6 +240,7 @@ AP_AdvancedFailsafe::check(uint32_t last_valid_rc_ms)
             if (_wp_comms_hold) {
                 _saved_wp = mission.get_current_nav_cmd().index;
                 mission.set_current_cmd(_wp_comms_hold);
+                set_mode_auto();
             }
             // if two events happen within 30s we consider it to be part of the same event
             if (now - _last_comms_loss_ms > 30*1000UL) {
