@@ -105,6 +105,9 @@ protected:
     // return the AFS mapped control mode
     virtual enum control_mode afs_mode(void) = 0;
 
+    //to force entering auto mode when datalink loss 
+    virtual void set_mode_auto(void) = 0;
+
     enum state _state;
 
     AP_Int8 _enable;
