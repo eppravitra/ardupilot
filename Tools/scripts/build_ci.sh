@@ -130,7 +130,7 @@ for t in $CI_BUILD_TARGET; do
     fi
     if [ "$t" == "sitltest-can" ]; then
         echo "Building SITL Periph GPS"
-        $waf configure --board sitl
+        $waf configure --board sitl --force-32bit
         $waf copter
         run_autotest "Copter" "build.SITLPeriphGPS" "test.CAN"
         continue
@@ -285,6 +285,8 @@ for t in $CI_BUILD_TARGET; do
         $waf configure --board Durandal
         $waf clean
         $waf copter
+        echo "Building CPUInfo"
+        $waf --target=tool/CPUInfo
 
         # test external flash build
         echo "Building SPRacingH7"
@@ -398,6 +400,12 @@ for t in $CI_BUILD_TARGET; do
     if [ "$t" == "python-cleanliness" ]; then
         echo "Checking Python code cleanliness"
         ./Tools/scripts/run_flake8.py
+        continue
+    fi
+
+    if [ "$t" == "astyle-cleanliness" ]; then
+        echo "Checking AStyle code cleanliness"
+        ./Tools/scripts/run_astyle.py
         continue
     fi
 

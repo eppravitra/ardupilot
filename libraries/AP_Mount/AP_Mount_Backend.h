@@ -49,7 +49,9 @@ public:
     // returns true if this mount can control its pan (required for multicopters)
     virtual bool has_pan_control() const = 0;
 
-    // get attitude as a quaternion.  returns true on success
+    // get attitude as a quaternion.  returns true on success.
+    // att_quat will be an earth-frame quaternion rotated such that
+    // yaw is in body-frame.
     virtual bool get_attitude_quaternion(Quaternion& att_quat) = 0;
 
     // get mount's mode
@@ -72,6 +74,8 @@ public:
 
     // set_roi_target - sets target location that mount should attempt to point towards
     void set_roi_target(const Location &target_loc);
+    // clear_roi_target - clears target location that mount should attempt to point towards
+    void clear_roi_target();
 
     // set_sys_target - sets system that mount should attempt to point towards
     void set_target_sysid(uint8_t sysid);

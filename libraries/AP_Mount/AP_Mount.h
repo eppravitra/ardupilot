@@ -139,6 +139,10 @@ public:
     void set_roi_target(const Location &target_loc) { set_roi_target(_primary,target_loc); }
     void set_roi_target(uint8_t instance, const Location &target_loc);
 
+    // clear_roi_target - clears target location that mount should attempt to point towards
+    void clear_roi_target() { clear_roi_target(_primary); }
+    void clear_roi_target(uint8_t instance);
+
     // point at system ID sysid
     void set_target_sysid(uint8_t sysid) { set_target_sysid(_primary, sysid); }
     void set_target_sysid(uint8_t instance, uint8_t sysid);
@@ -215,6 +219,7 @@ private:
     MAV_RESULT handle_command_do_mount_configure(const mavlink_command_long_t &packet);
     MAV_RESULT handle_command_do_mount_control(const mavlink_command_long_t &packet);
     MAV_RESULT handle_command_do_gimbal_manager_pitchyaw(const mavlink_command_long_t &packet);
+    void handle_gimbal_manager_set_attitude(const mavlink_message_t &msg);
     void handle_global_position_int(const mavlink_message_t &msg);
     void handle_gimbal_device_information(const mavlink_message_t &msg);
     void handle_gimbal_device_attitude_status(const mavlink_message_t &msg);

@@ -69,6 +69,7 @@
 #include <AC_Sprayer/AC_Sprayer.h>          // Crop sprayer library
 #include <AP_ADSB/AP_ADSB.h>                // ADS-B RF based collision avoidance module library
 #include <AP_Proximity/AP_Proximity.h>      // ArduPilot proximity sensor library
+#include <AC_PrecLand/AC_PrecLand_config.h>
 #include <AP_OpticalFlow/AP_OpticalFlow.h>
 #include <AP_Winch/AP_Winch_config.h>
 
@@ -99,8 +100,8 @@
 #include "AP_Rally.h"           // Rally point library
 #include "AP_Arming.h"
 
-// libraries which are dependent on #defines in defines.h and/or config.h
-#if BEACON_ENABLED == ENABLED
+#include <AP_Beacon/AP_Beacon_config.h>
+#if AP_BEACON_ENABLED
  #include <AP_Beacon/AP_Beacon.h>
 #endif
 
@@ -115,7 +116,7 @@
 #if AP_GRIPPER_ENABLED
  # include <AP_Gripper/AP_Gripper.h>
 #endif
-#if PRECISION_LANDING == ENABLED
+#if AC_PRECLAND_ENABLED
  # include <AC_PrecLand/AC_PrecLand.h>
  # include <AC_PrecLand/AC_PrecLand_StateMachine.h>
 #endif
@@ -529,7 +530,7 @@ private:
 #endif
 
     // Precision Landing
-#if PRECISION_LANDING == ENABLED
+#if AC_PRECLAND_ENABLED
     AC_PrecLand precland;
     AC_PrecLand_StateMachine precland_statemachine;
 #endif

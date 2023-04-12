@@ -1494,10 +1494,11 @@ class AutoTest(ABC):
                  replay=False,
                  sup_binaries=[],
                  reset_after_every_test=False,
-                 sitl_32bit=False,
+                 force_32bit=False,
                  ubsan=False,
                  ubsan_abort=False,
                  num_aux_imus=0,
+                 dronecan_tests=False,
                  build_opts={}):
 
         self.start_time = time.time()
@@ -1521,7 +1522,7 @@ class AutoTest(ABC):
             self.speedup = self.default_speedup()
         self.sup_binaries = sup_binaries
         self.reset_after_every_test = reset_after_every_test
-        self.sitl_32bit = sitl_32bit
+        self.force_32bit = force_32bit
         self.ubsan = ubsan
         self.ubsan_abort = ubsan_abort
         self.build_opts = build_opts
@@ -1578,6 +1579,7 @@ class AutoTest(ABC):
             offline=self.terrain_in_offline_mode
         )
         self.terrain_data_messages_sent = 0  # count of messages back
+        self.dronecan_tests = dronecan_tests
 
     def __del__(self):
         if self.rc_thread is not None:
@@ -2780,7 +2782,7 @@ class AutoTest(ABC):
                         continue
                     if "#if FRAME_CONFIG == HELI_FRAME" in line:
                         continue
-                    if "#if PRECISION_LANDING == ENABLED" in line:
+                    if "#if AC_PRECLAND_ENABLED" in line:
                         continue
                     if "#end" in line:
                         continue
@@ -7856,6 +7858,9 @@ Also, ignores heartbeats not from our target system'''
             passed = False
             reset_needed = True
 
+        # if we haven't already reset ArduPilot because it's dead,
+        # then ensure the vehicle was disarmed at the end of the test.
+        # If it wasn't then the test is considered failed:
         if ardupilot_alive and self.armed() and not self.is_tracker():
             if ex is None:
                 ex = ArmedAtEndOfTestException("Still armed at end of test")
@@ -7872,6 +7877,10 @@ Also, ignores heartbeats not from our target system'''
                 self.progress("Force-rebooting SITL")
                 self.reboot_sitl() # that'll learn it
             passed = False
+        elif not passed:  # implicit reboot after a failed test:
+            self.progress("Test failed but ArduPilot process alive; rebooting")
+            self.progress("Force-rebooting SITL")
+            self.reboot_sitl() # that'll learn it
 
         if self._mavproxy is not None:
             self.progress("Stopping auto-started mavproxy")
@@ -11663,10 +11672,12 @@ switch value'''
                 0,
                 want_result=mavutil.mavlink.MAV_RESULT_FAILED
             )
-            self.wait_statustext("PreArm: Motors Emergency Stopped", check_context=True)
+            self.assert_prearm_failure("Motors Emergency Stopped",
+                                       other_prearm_failures_fatal=False)
             self.reboot_sitl()
-            self.delay_sim_time(10)
-            self.assert_prearm_failure("Motors Emergency Stopped")
+            self.assert_prearm_failure(
+                "Motors Emergency Stopped",
+                other_prearm_failures_fatal=False)
             self.context_pop()
             self.reboot_sitl()
 
