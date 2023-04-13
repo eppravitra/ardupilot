@@ -83,6 +83,9 @@ def build(bld):
         'PoseStamped.idl',
         'Quaternion.idl',
         'Time.idl',
+        'Transform.idl',
+        'TransformStamped.idl',
+        "TFMessage.idl",
         'Twist.idl',
         'TwistStamped.idl',
         'Vector3.idl',
@@ -103,7 +106,7 @@ def build(bld):
             # build IDL file
             source=idl,
             target=gen,
-            rule=f"{bld.env.MICROXRCEDDSGEN[0]} -replace -d {os.path.join(gen_path, 'generated')} {idl}",
+            rule=f"{bld.env.MICROXRCEDDSGEN[0]} -cs -replace -d {os.path.join(gen_path, 'generated')} {idl}",
             group='dynamic_sources',
         )
         bld.env.AP_LIB_EXTRA_SOURCES['AP_DDS'] += [os.path.join('generated', gen_c)]
