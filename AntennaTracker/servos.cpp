@@ -99,6 +99,25 @@ void Tracker::update_pitch_position_servo()
     }
 }
 
+/*
+   update the pitch (elevation) servo
+   for the case where there is no PID (e.g. PID is taken care of externally using a smart actuator). 
+   This can occur in a setup where ahrs is not attached to the antenna but instead attached to the base.
+ */
+void Tracker::update_pitch_pos_cmd_servo(float pitch)
+{
+    if (g.pitch_max == g.pitch_min){//prevent divide by zero
+        return;
+    }
+
+    //I think body frame pitch is wrong
+    float pitch_limited = constrain_float(pitch,g.pitch_min,g.pitch_max);
+    //float pitch_limited = constrain_float(nav_status.pitch,g.pitch_min,g.pitch_max);
+    
+    float new_servo_out = (g.pitch_pos_pwm_max - g.pitch_pos_pwm_min)/(g.pitch_max - g.pitch_min)*pitch_limited + g.pitch_pos_pwm_min;
+
+    SRV_Channels::set_output_pwm(SRV_Channel::k_tracker_pitch,new_servo_out);
+}
 
 /**
    update the pitch (elevation) servo. The aim is to drive the boards ahrs pitch to the
@@ -239,8 +258,16 @@ void Tracker::update_yaw_onoff_servo(float yaw) const
 /**
    update the yaw continuous rotation servo
  */
+void Tracker::update_yaw_cr_servo(float yaw_error)
+{
+    const float yaw_out = constrain_float(-g.pidYaw2Srv.update_error(yaw_error, G_Dt), -g.yaw_range * 100/2, g.yaw_range * 100/2);
+    SRV_Channels::set_output_scaled(SRV_Channel::k_tracker_yaw, yaw_out);
+}
+
+/*
 void Tracker::update_yaw_cr_servo(float yaw)
 {
     const float yaw_out = constrain_float(-g.pidYaw2Srv.update_error(nav_status.angle_error_yaw, G_Dt), -g.yaw_range * 100/2, g.yaw_range * 100/2);
     SRV_Channels::set_output_scaled(SRV_Channel::k_tracker_yaw, yaw_out);
 }
+*/

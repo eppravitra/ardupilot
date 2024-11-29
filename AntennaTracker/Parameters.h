@@ -97,6 +97,8 @@ public:
         k_param_mavlink_update_rate,
         k_param_pitch_min,
         k_param_pitch_max,
+        k_param_pitch_pos_pwm_min,
+        k_param_pitch_pos_pwm_max,
         k_param_gcs4,
         k_param_gcs5,
         k_param_gcs6,
@@ -167,6 +169,8 @@ public:
     AP_Int16 distance_min;          // target's must be at least this distance from tracker to be tracked
     AP_Int16 pitch_min;
     AP_Int16 pitch_max;
+    AP_Int16 pitch_pos_pwm_min;
+    AP_Int16 pitch_pos_pwm_max;
     AP_Int16 gcs_pid_mask;
     AP_Int8  initial_mode;
     AP_Int8 disarm_pwm;

@@ -186,6 +186,7 @@ private:
     void init_servos();
     void update_pitch_servo(float pitch);
     void update_pitch_position_servo(void);
+    void update_pitch_pos_cmd_servo(float pitch);
     void update_pitch_onoff_servo(float pitch) const;
     void update_pitch_cr_servo(float pitch);
     void update_yaw_servo(float yaw);

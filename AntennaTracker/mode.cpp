@@ -5,9 +5,35 @@
 void Mode::update_auto(void)
 {
     struct Tracker::NavStatus &nav_status = tracker.nav_status;
-
     Parameters &g = tracker.g;
+    float target_pitch, target_yaw;
+    float yaw_error,bf_pitch_cmd;
 
+    target_yaw   = radians(nav_status.bearing+g.yaw_trim);
+
+    // only move servos if target is at least distance_min away if we  have a target
+    if((nav_status.distance >= g.distance_min) && tracker.vehicle.location_valid){
+ 
+        target_pitch = radians(constrain_float(nav_status.pitch+g.pitch_trim, g.pitch_min, g.pitch_max)); 
+    
+        update_command(target_yaw,target_pitch,&yaw_error,&bf_pitch_cmd);
+    
+    }else{
+        yaw_error = 0;
+        bf_pitch_cmd = 0;
+    }
+
+ // update actuators
+    tracker.update_yaw_cr_servo(degrees(yaw_error)*100.0f);
+    tracker.update_pitch_pos_cmd_servo(degrees(bf_pitch_cmd));
+
+ //logging
+    g.pidYaw2Srv.set_target_rate(degrees(target_yaw));
+    g.pidYaw2Srv.set_actual_rate(degrees(AP::ahrs().get_yaw()));
+    g.pidPitch2Srv.set_target_rate(degrees(bf_pitch_cmd));
+    g.pidPitch2Srv.set_actual_rate(degrees(AP::ahrs().get_pitch()));
+
+    #if 0
     float yaw = wrap_180_cd((nav_status.bearing+g.yaw_trim)*100); // target yaw in centidegrees
     float pitch = constrain_float(nav_status.pitch+g.pitch_trim, g.pitch_min, g.pitch_max) * 100; // target pitch in centidegrees
 
@@ -24,6 +50,35 @@ void Mode::update_auto(void)
         tracker.update_pitch_servo(bf_pitch);
         tracker.update_yaw_servo(bf_yaw);
     }
+    #endif
+}
+
+void Mode::update_command(float target_yaw, float target_pitch, float* yaw_error, float* bf_pitch_cmd)
+{
+    Vector3f u,u_b;
+
+    //calculate yaw error
+    *yaw_error = target_yaw - AP::ahrs().get_yaw();
+
+    while (*yaw_error > M_PI) {
+        *yaw_error -= M_2PI;
+    }
+
+    while (*yaw_error < -M_PI) {
+        *yaw_error += M_2PI;
+    }
+
+    //determine commanded pitch in body frame
+
+    //unit vector pointing to target in Earth frame
+    u.x =  cosf(target_pitch)*cosf(target_yaw);
+    u.y =  cosf(target_pitch)*sinf(target_yaw);
+    u.z = -sinf(target_pitch);   
+
+    //unit vector pointing to target in body frame
+    u_b = AP::ahrs().earth_to_body(u);
+    
+    *bf_pitch_cmd = atan2f(-u_b.z, sqrtf(u_b.x*u_b.x + u_b.y*u_b.y));
 }
 
 void Mode::update_scan(void)

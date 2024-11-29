@@ -37,6 +37,7 @@ protected:
     void calc_angle_error(float pitch, float yaw, bool direction_reversed);
     void convert_ef_to_bf(float pitch, float yaw, float& bf_pitch, float& bf_yaw);
     bool convert_bf_to_ef(float pitch, float yaw, float& ef_pitch, float& ef_yaw);
+    void update_command(float target_yaw, float target_pitch, float* yaw_error, float* bf_pitch_cmd);
 };
 
 class ModeAuto : public Mode {

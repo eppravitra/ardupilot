@@ -208,6 +208,18 @@ const AP_Param::Info Tracker::var_info[] = {
     // @User: Standard
     GSCALAR(pitch_max,               "PITCH_MAX",	PITCH_MAX_DEFAULT),
 
+    // @Param: PITCH_POS_PWM_MIN
+    // @DisplayName: Minimum PWM outputted by position command pitch mode
+    // @Description: This corresponds to minimum angle of the pitch servo
+    // @User: Standard
+    GSCALAR(pitch_pos_pwm_min, "PTCH_POS_PWM_MIN", 1100),
+
+    // @Param: PTCH_POS_PWM_MAX
+    // @DisplayName: Maximum PWM outputted by position command pitch mode
+    // @Description: This corresponds to maximum angle of the pitch servo
+    // @User: Standard
+    GSCALAR(pitch_pos_pwm_max, "PTCH_POS_PWM_MAX", 1900),
+
     // barometer library
     // @Group: BARO
     // @Path: ../libraries/AP_Baro/AP_Baro.cpp
