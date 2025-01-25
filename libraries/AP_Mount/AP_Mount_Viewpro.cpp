@@ -371,9 +371,19 @@ void AP_Mount_Viewpro::process_packet()
             gcs().send_text(MAV_SEVERITY_INFO,  "%s recording %s", send_text_prefix, _recording ? "ON" : "OFF");
         }
 
-        // get optical zoom times
-        _zoom_times = UINT16_VALUE(_msg_buff[_msg_buff_data_start+39], _msg_buff[_msg_buff_data_start+40]) * 0.1;
-
+        switch (_image_sensor) {
+            default:   
+            case ImageSensor::EO1:
+            case ImageSensor::EO1_IR_PIP:
+                //optical zoom times
+                _zoom_times = UINT16_VALUE(_msg_buff[_msg_buff_data_start+39], _msg_buff[_msg_buff_data_start+40]) * 0.1;
+                break;
+            case ImageSensor::IR:
+            case ImageSensor::IR_EO1_PIP:
+                //ir zoom times
+                _zoom_times = (((_msg_buff[_msg_buff_data_start+29] >> 3) & 0x0F) + 1)*1.0;
+                break;
+        }        
         // get laser rangefinder distance
         _rangefinder_dist_m = UINT16_VALUE(_msg_buff[_msg_buff_data_start+33], _msg_buff[_msg_buff_data_start+34]) * 0.1;
         break;
@@ -759,13 +769,30 @@ bool AP_Mount_Viewpro::set_zoom(ZoomType zoom_type, float zoom_value)
 
     // zoom rate
     if (zoom_type == ZoomType::RATE) {
+        uint8_t zoom_speed = 1;
         CameraCommand zoom_cmd = CameraCommand::STOP_FOCUS_AND_ZOOM;
-        if (zoom_value < 0) {
-            zoom_cmd = CameraCommand::ZOOM_OUT;
-        } else if (zoom_value > 0) {
-            zoom_cmd = CameraCommand::ZOOM_IN;
-        }
-        return send_camera_command(_image_sensor, zoom_cmd, AP_MOUNT_VIEWPRO_ZOOM_SPEED);
+        
+            switch (_image_sensor) {
+                default:   
+                case ImageSensor::EO1:
+                case ImageSensor::EO1_IR_PIP:
+                    if (zoom_value < 0) {
+                        zoom_cmd = CameraCommand::ZOOM_OUT;
+                    } else if (zoom_value > 0) {
+                        zoom_cmd = CameraCommand::ZOOM_IN;
+                    }
+                    zoom_speed = AP_MOUNT_VIEWPRO_ZOOM_SPEED;
+                    break;
+                case ImageSensor::IR:
+                case ImageSensor::IR_EO1_PIP:
+                    if (zoom_value < 0) {
+                        zoom_cmd = CameraCommand::IR_ZOOM_IN;
+                    } else if (zoom_value > 0) {
+                        zoom_cmd = CameraCommand::IR_ZOOM_OUT;
+                    }
+                    break;    
+                }
+        return send_camera_command(_image_sensor, zoom_cmd, zoom_speed );
     }
 
     // zoom percentage
