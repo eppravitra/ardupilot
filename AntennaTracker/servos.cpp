@@ -120,8 +120,8 @@ void Tracker::update_pitch_pos_cmd_servo(float pitch_cmd)
 
     //absolute limit
     float pitch_limited = constrain_float(pitch_r,g.pitch_min,g.pitch_max);
-    
-    float new_servo_out = ((g.pitch_pos_pwm_max - g.pitch_pos_pwm_min)*1.0)/(g.pitch_max - g.pitch_min)*pitch_limited + g.pitch_pos_pwm_min;
+
+    float new_servo_out = ((g.pitch_pos_pwm_max - g.pitch_pos_pwm_min)*1.0)/(g.pitch_max - g.pitch_min)*(pitch_limited- g.pitch_min) + g.pitch_pos_pwm_min;
 
     SRV_Channels::set_output_pwm(SRV_Channel::k_tracker_pitch,new_servo_out);
 }
