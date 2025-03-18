@@ -104,15 +104,22 @@ void Tracker::update_pitch_position_servo()
    for the case where there is no PID (e.g. PID is taken care of externally using a smart actuator). 
    This can occur in a setup where ahrs is not attached to the antenna but instead attached to the base.
  */
-void Tracker::update_pitch_pos_cmd_servo(float pitch)
+void Tracker::update_pitch_pos_cmd_servo(float pitch_cmd)
 {
+    static float pitch_r = 0.0; //pitch with rate limit
+
+    float dt = 0.02; //50 Hz
+    float pitch_rate_max = 45; //dps
+
     if (g.pitch_max == g.pitch_min){//prevent divide by zero
         return;
     }
 
-    //I think body frame pitch is wrong
-    float pitch_limited = constrain_float(pitch,g.pitch_min,g.pitch_max);
-    //float pitch_limited = constrain_float(nav_status.pitch,g.pitch_min,g.pitch_max);
+    //rate limit
+    pitch_r += constrain_float(pitch_cmd - pitch_r, -pitch_rate_max*dt, pitch_rate_max*dt);
+
+    //absolute limit
+    float pitch_limited = constrain_float(pitch_r,g.pitch_min,g.pitch_max);
     
     float new_servo_out = ((g.pitch_pos_pwm_max - g.pitch_pos_pwm_min)*1.0)/(g.pitch_max - g.pitch_min)*pitch_limited + g.pitch_pos_pwm_min;
 
