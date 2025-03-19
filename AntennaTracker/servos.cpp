@@ -109,7 +109,7 @@ void Tracker::update_pitch_pos_cmd_servo(float pitch_cmd)
     static float pitch_r = 0.0; //pitch with rate limit
 
     float dt = 0.02; //50 Hz
-    float pitch_rate_max = 45; //dps
+    float pitch_rate_max = 30; //dps
 
     if (g.pitch_max == g.pitch_min){//prevent divide by zero
         return;
