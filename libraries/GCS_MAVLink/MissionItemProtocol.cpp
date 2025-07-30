@@ -109,12 +109,12 @@ void MissionItemProtocol::handle_mission_request_list(
         return;
     }
 
-    if (receiving) {
+    //if (receiving) {
         // someone is uploading a mission; reject fetching of points
         // until done or timeout
         send_mission_ack(_link, msg, MAV_MISSION_DENIED);
         return;
-    }
+    //}
 
     // reply with number of commands in the mission.  The GCS will
     // then request each command separately
