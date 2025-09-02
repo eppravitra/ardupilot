@@ -34,6 +34,20 @@ void AP_Mount_Backend::set_dev_id(uint32_t id)
     _params.dev_id.set_and_save(int32_t(id));
 }
 
+// base implementation should be called from derived classes for common functionality
+void AP_Mount_Backend::update()
+{
+    
+    // set target rate to zero if we have not received rate command for a while
+    if ((get_mode() == MAV_MOUNT_MODE_MAVLINK_TARGETING) &&
+        (mnt_target.target_type == MountTargetType::RATE) &&
+        (AP_HAL::millis() - mnt_target.last_rate_request_ms > _params.rate_request_timeout*1000.0f)) {
+        mnt_target.rate_rads.roll = 0;
+        mnt_target.rate_rads.pitch = 0;
+        mnt_target.rate_rads.yaw = 0;
+    }
+}
+
 // return true if this mount accepts roll targets
 bool AP_Mount_Backend::has_roll_control() const
 {
@@ -108,6 +122,7 @@ void AP_Mount_Backend::set_rate_target(float roll_degs, float pitch_degs, float 
     mnt_target.rate_rads.pitch = radians(pitch_degs);
     mnt_target.rate_rads.yaw = radians(yaw_degs);
     mnt_target.rate_rads.yaw_is_ef = yaw_is_earth_frame;
+    mnt_target.last_rate_request_ms = AP_HAL::millis();
 
     // set the mode to mavlink targeting
     set_mode(MAV_MOUNT_MODE_MAVLINK_TARGETING);
